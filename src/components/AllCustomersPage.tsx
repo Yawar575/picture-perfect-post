@@ -1,29 +1,49 @@
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Users, Trash2, UserPlus, Mail, MapPin } from "lucide-react";
-import { useCustomers } from "@/lib/customers";
+import { Users, Trash2, UserPlus, Mail, MapPin, Pencil, Trash } from "lucide-react";
+import { useCustomers, type Customer } from "@/lib/customers";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
+import { EditCustomerDialog } from "@/components/EditCustomerDialog";
 
 export function AllCustomersPage() {
-  const { customers, remove, toggleStatus } = useCustomers();
+  const { customers, remove, removeAll, update, toggleStatus } = useCustomers();
+  const [editing, setEditing] = useState<Customer | null>(null);
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-10">
       <Toaster richColors position="top-right" />
-      <header className="mb-6 flex items-start gap-3">
-        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent text-accent-foreground">
-          <Users className="h-5 w-5" />
+      <header className="mb-6 flex flex-wrap items-start justify-between gap-3">
+        <div className="flex items-start gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent text-accent-foreground">
+            <Users className="h-5 w-5" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+              All Customers
+            </h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {customers.length === 0
+                ? "No customers yet — add your first one."
+                : `${customers.length} customer${customers.length === 1 ? "" : "s"} on record.`}
+            </p>
+          </div>
         </div>
-        <div className="flex-1">
-          <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-            All Customers
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {customers.length === 0
-              ? "No customers yet — add your first one."
-              : `${customers.length} customer${customers.length === 1 ? "" : "s"} on record.`}
-          </p>
-        </div>
+        {customers.length > 0 && (
+          <button
+            type="button"
+            onClick={() => {
+              if (window.confirm(`Delete all ${customers.length} customers? This cannot be undone.`)) {
+                removeAll();
+                toast.success("All customers deleted");
+              }
+            }}
+            className="inline-flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/10 px-3.5 py-2 text-sm font-semibold text-destructive transition-colors hover:bg-destructive hover:text-destructive-foreground"
+          >
+            <Trash className="h-4 w-4" />
+            Delete All
+          </button>
+        )}
       </header>
 
       {customers.length === 0 ? (
@@ -62,17 +82,29 @@ export function AllCustomersPage() {
                     <span className="truncate">{c.address}</span>
                   </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    remove(c.id);
-                    toast.success("Customer removed");
-                  }}
-                  className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
-                  aria-label="Delete customer"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
+                <div className="flex shrink-0 items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setEditing(c)}
+                    className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                    aria-label="Edit customer"
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (window.confirm(`Delete ${c.name}?`)) {
+                        remove(c.id);
+                        toast.success("Customer removed");
+                      }
+                    }}
+                    className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+                    aria-label="Delete customer"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
 
               <dl className="mt-4 grid grid-cols-3 gap-3 border-t border-border pt-4 text-sm">
@@ -106,6 +138,12 @@ export function AllCustomersPage() {
           ))}
         </div>
       )}
+
+      <EditCustomerDialog
+        customer={editing}
+        onClose={() => setEditing(null)}
+        onSave={(id, patch) => update(id, patch)}
+      />
     </main>
   );
 }

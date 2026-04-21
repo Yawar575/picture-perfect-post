@@ -57,6 +57,9 @@ export function useCustomers() {
       write([next, ...read()]);
     },
     remove: (id: string) => write(read().filter((c) => c.id !== id)),
+    removeAll: () => write([]),
+    update: (id: string, patch: Partial<Omit<Customer, "id" | "createdAt">>) =>
+      write(read().map((c) => (c.id === id ? { ...c, ...patch } : c))),
     toggleStatus: (id: string) =>
       write(
         read().map((c) =>
