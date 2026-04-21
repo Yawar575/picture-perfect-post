@@ -11,7 +11,7 @@ const schema = z.object({
   netMb: z.coerce.number().min(0).max(1000000),
   fees: z.coerce.number().min(0).max(10000000),
   date: z.string().min(1, "Date is required"),
-  status: z.enum(["Paid", "Unpaid"]),
+  status: z.enum(["Paid", "Unpaid", "Pending"]),
 });
 
 type Props = {
@@ -156,6 +156,7 @@ export function EditCustomerDialog({ customer, onClose, onSave }: Props) {
               >
                 <option value="Unpaid">Unpaid</option>
                 <option value="Paid">Paid</option>
+                <option value="Pending">Pending</option>
               </select>
             </Field>
           </div>

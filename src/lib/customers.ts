@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-export type PaymentStatus = "Paid" | "Unpaid";
+export type PaymentStatus = "Paid" | "Unpaid" | "Pending";
 
 export type Customer = {
   id: string;
@@ -66,5 +66,7 @@ export function useCustomers() {
           c.id === id ? { ...c, status: c.status === "Paid" ? "Unpaid" : "Paid" } : c,
         ),
       ),
+    setStatusAll: (status: PaymentStatus) =>
+      write(read().map((c) => ({ ...c, status }))),
   };
 }

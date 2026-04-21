@@ -1,50 +1,123 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Users, Trash2, UserPlus, Mail, MapPin, Pencil, Trash } from "lucide-react";
-import { useCustomers, type Customer } from "@/lib/customers";
+import {
+  Users,
+  Trash2,
+  UserPlus,
+  Pencil,
+  Search,
+  RefreshCw,
+  PencilLine,
+  ChevronDown,
+  ChevronUp,
+  Mail,
+  MapPin,
+} from "lucide-react";
+import { useCustomers, type Customer, type PaymentStatus } from "@/lib/customers";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import { EditCustomerDialog } from "@/components/EditCustomerDialog";
 
+type Filter = "All" | PaymentStatus;
+
 export function AllCustomersPage() {
-  const { customers, remove, removeAll, update, toggleStatus } = useCustomers();
+  const { customers, remove, update, toggleStatus, setStatusAll } = useCustomers();
   const [editing, setEditing] = useState<Customer | null>(null);
+  const [query, setQuery] = useState("");
+  const [filter, setFilter] = useState<Filter>("All");
+  const [expanded, setExpanded] = useState<string | null>(null);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return customers.filter((c) => {
+      if (filter !== "All" && c.status !== filter) return false;
+      if (!q) return true;
+      return c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q);
+    });
+  }, [customers, query, filter]);
+
+  const stats = useMemo(() => {
+    let totalFees = 0;
+    let paid = 0;
+    let unpaid = 0;
+    let pending = 0;
+    for (const c of customers) {
+      totalFees += Number(c.fees) || 0;
+      if (c.status === "Paid") paid++;
+      else if (c.status === "Unpaid") unpaid++;
+      else pending++;
+    }
+    return { totalFees, paid, unpaid, pending };
+  }, [customers]);
+
+  function handleBulk(status: PaymentStatus) {
+    if (customers.length === 0) return;
+    if (window.confirm(`Mark all ${customers.length} customers as ${status}?`)) {
+      setStatusAll(status);
+      toast.success(`All marked as ${status}`);
+    }
+  }
 
   return (
-    <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-10">
+    <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10">
       <Toaster richColors position="top-right" />
+
       <header className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-start gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent text-accent-foreground">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent text-accent-foreground">
             <Users className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">
               All Customers
             </h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {customers.length === 0
-                ? "No customers yet — add your first one."
-                : `${customers.length} customer${customers.length === 1 ? "" : "s"} on record.`}
+            <p className="mt-0.5 text-sm text-muted-foreground">
+              {customers.length} total record{customers.length === 1 ? "" : "s"}
             </p>
           </div>
         </div>
-        {customers.length > 0 && (
+        <button
+          type="button"
+          onClick={() => {
+            window.dispatchEvent(new Event("customers:changed"));
+            toast.success("Refreshed");
+          }}
+          className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3.5 py-2 text-sm font-semibold text-foreground shadow-[var(--shadow-card)] transition-colors hover:bg-muted"
+        >
+          <RefreshCw className="h-4 w-4" />
+          Refresh
+        </button>
+      </header>
+
+      {customers.length > 0 && (
+        <div className="mb-5 flex flex-wrap items-center gap-2">
+          <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
+            <PencilLine className="h-4 w-4" />
+            Edit All Status:
+          </span>
           <button
             type="button"
-            onClick={() => {
-              if (window.confirm(`Delete all ${customers.length} customers? This cannot be undone.`)) {
-                removeAll();
-                toast.success("All customers deleted");
-              }
-            }}
-            className="inline-flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/10 px-3.5 py-2 text-sm font-semibold text-destructive transition-colors hover:bg-destructive hover:text-destructive-foreground"
+            onClick={() => handleBulk("Paid")}
+            className="rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-sm font-semibold text-emerald-700 transition-colors hover:bg-emerald-100 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
           >
-            <Trash className="h-4 w-4" />
-            Delete All
+            Mark All Paid
           </button>
-        )}
-      </header>
+          <button
+            type="button"
+            onClick={() => handleBulk("Unpaid")}
+            className="rounded-lg border border-rose-300 bg-rose-50 px-3 py-1.5 text-sm font-semibold text-rose-700 transition-colors hover:bg-rose-100 dark:border-rose-800 dark:bg-rose-950 dark:text-rose-300"
+          >
+            Mark All Unpaid
+          </button>
+          <button
+            type="button"
+            onClick={() => handleBulk("Pending")}
+            className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-1.5 text-sm font-semibold text-amber-700 transition-colors hover:bg-amber-100 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-300"
+          >
+            Mark All Pending
+          </button>
+        </div>
+      )}
 
       {customers.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-border bg-card p-12 text-center shadow-[var(--shadow-card)]">
@@ -64,79 +137,101 @@ export function AllCustomersPage() {
           </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          {customers.map((c) => (
-            <article
-              key={c.id}
-              className="rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-card)]"
+        <>
+          <div className="mb-4 flex flex-wrap items-center gap-3">
+            <div className="relative min-w-0 flex-1">
+              <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <input
+                type="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search by name or email..."
+                className="w-full rounded-xl border border-border bg-card py-2.5 pl-10 pr-3.5 text-sm text-foreground shadow-[var(--shadow-card)] placeholder:text-muted-foreground/70 focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/30"
+              />
+            </div>
+            <select
+              value={filter}
+              onChange={(e) => setFilter(e.target.value as Filter)}
+              className="rounded-xl border border-border bg-card px-3.5 py-2.5 text-sm font-medium text-foreground shadow-[var(--shadow-card)] focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/30"
             >
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0 flex-1">
-                  <h3 className="truncate text-base font-bold text-foreground">{c.name}</h3>
-                  <div className="mt-1.5 flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <Mail className="h-3.5 w-3.5 shrink-0" />
-                    <span className="truncate">{c.email}</span>
-                  </div>
-                  <div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <MapPin className="h-3.5 w-3.5 shrink-0" />
-                    <span className="truncate">{c.address}</span>
-                  </div>
-                </div>
-                <div className="flex shrink-0 items-center gap-1">
-                  <button
-                    type="button"
-                    onClick={() => setEditing(c)}
-                    className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-                    aria-label="Edit customer"
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (window.confirm(`Delete ${c.name}?`)) {
-                        remove(c.id);
-                        toast.success("Customer removed");
-                      }
-                    }}
-                    className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
-                    aria-label="Delete customer"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
+              <option value="All">All Status</option>
+              <option value="Paid">Paid</option>
+              <option value="Unpaid">Unpaid</option>
+              <option value="Pending">Pending</option>
+            </select>
+          </div>
 
-              <dl className="mt-4 grid grid-cols-3 gap-3 border-t border-border pt-4 text-sm">
-                <div>
-                  <dt className="text-xs text-muted-foreground">Net MB</dt>
-                  <dd className="mt-0.5 font-semibold text-foreground">{c.netMb}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs text-muted-foreground">Fees</dt>
-                  <dd className="mt-0.5 font-semibold text-foreground">{c.fees}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs text-muted-foreground">Date</dt>
-                  <dd className="mt-0.5 font-semibold text-foreground">{c.date}</dd>
-                </div>
-              </dl>
+          <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)]">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border bg-muted/40 text-xs uppercase tracking-wide text-muted-foreground">
+                    <th className="px-4 py-3 text-left font-semibold">Name</th>
+                    <th className="px-4 py-3 text-left font-semibold">Email</th>
+                    <th className="px-4 py-3 text-left font-semibold">Net MB</th>
+                    <th className="px-4 py-3 text-left font-semibold">Fees</th>
+                    <th className="px-4 py-3 text-left font-semibold">Address</th>
+                    <th className="px-4 py-3 text-left font-semibold">Date</th>
+                    <th className="px-4 py-3 text-left font-semibold">Status</th>
+                    <th className="px-4 py-3 text-right font-semibold">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.length === 0 ? (
+                    <tr>
+                      <td colSpan={8} className="px-4 py-10 text-center text-sm text-muted-foreground">
+                        No customers match your filters.
+                      </td>
+                    </tr>
+                  ) : (
+                    filtered.map((c) => {
+                      const isOpen = expanded === c.id;
+                      return (
+                        <FragmentRow
+                          key={c.id}
+                          c={c}
+                          isOpen={isOpen}
+                          onToggle={() => setExpanded(isOpen ? null : c.id)}
+                          onEdit={() => setEditing(c)}
+                          onDelete={() => {
+                            if (window.confirm(`Delete ${c.name}?`)) {
+                              remove(c.id);
+                              toast.success("Customer removed");
+                            }
+                          }}
+                          onCycleStatus={() => toggleStatus(c.id)}
+                        />
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
 
-              <button
-                type="button"
-                onClick={() => toggleStatus(c.id)}
-                className={
-                  "mt-4 inline-flex w-full items-center justify-center rounded-lg px-3 py-2 text-xs font-semibold transition-colors " +
-                  (c.status === "Paid"
-                    ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200 dark:bg-emerald-950 dark:text-emerald-300"
-                    : "bg-amber-100 text-amber-700 hover:bg-amber-200 dark:bg-amber-950 dark:text-amber-300")
-                }
-              >
-                {c.status} — tap to toggle
-              </button>
-            </article>
-          ))}
-        </div>
+          <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-1 text-sm text-muted-foreground">
+            <span>
+              Total: <span className="font-bold text-foreground">{customers.length}</span> customers
+            </span>
+            <span>
+              Total Fees:{" "}
+              <span className="font-bold text-foreground">
+                {stats.totalFees.toLocaleString()}
+              </span>
+            </span>
+            <span>
+              Paid: <span className="font-bold text-emerald-600 dark:text-emerald-400">{stats.paid}</span>
+            </span>
+            <span>
+              Unpaid: <span className="font-bold text-rose-600 dark:text-rose-400">{stats.unpaid}</span>
+            </span>
+            {stats.pending > 0 && (
+              <span>
+                Pending: <span className="font-bold text-amber-600 dark:text-amber-400">{stats.pending}</span>
+              </span>
+            )}
+          </div>
+        </>
       )}
 
       <EditCustomerDialog
@@ -145,5 +240,97 @@ export function AllCustomersPage() {
         onSave={(id, patch) => update(id, patch)}
       />
     </main>
+  );
+}
+
+function StatusPill({ status }: { status: PaymentStatus }) {
+  const cls =
+    status === "Paid"
+      ? "border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
+      : status === "Unpaid"
+        ? "border-rose-300 bg-rose-50 text-rose-700 dark:border-rose-800 dark:bg-rose-950 dark:text-rose-300"
+        : "border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-300";
+  return (
+    <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${cls}`}>
+      {status}
+    </span>
+  );
+}
+
+function FragmentRow({
+  c,
+  isOpen,
+  onToggle,
+  onEdit,
+  onDelete,
+  onCycleStatus,
+}: {
+  c: Customer;
+  isOpen: boolean;
+  onToggle: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+  onCycleStatus: () => void;
+}) {
+  return (
+    <>
+      <tr className="border-b border-border last:border-b-0 transition-colors hover:bg-muted/30">
+        <td className="px-4 py-3.5 font-bold text-foreground">{c.name}</td>
+        <td className="px-4 py-3.5 text-muted-foreground">{c.email}</td>
+        <td className="px-4 py-3.5 font-medium text-foreground">{c.netMb} MB</td>
+        <td className="px-4 py-3.5 font-bold text-foreground">{c.fees}</td>
+        <td className="px-4 py-3.5 text-muted-foreground">{c.address || "—"}</td>
+        <td className="px-4 py-3.5 text-muted-foreground">{c.date || "—"}</td>
+        <td className="px-4 py-3.5">
+          <button type="button" onClick={onCycleStatus} aria-label="Cycle status">
+            <StatusPill status={c.status} />
+          </button>
+        </td>
+        <td className="px-4 py-3.5">
+          <div className="flex items-center justify-end gap-1">
+            <button
+              type="button"
+              onClick={onToggle}
+              className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              aria-label={isOpen ? "Collapse" : "Expand"}
+            >
+              {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            </button>
+            <button
+              type="button"
+              onClick={onEdit}
+              className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+              aria-label="Edit customer"
+            >
+              <Pencil className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              onClick={onDelete}
+              className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+              aria-label="Delete customer"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          </div>
+        </td>
+      </tr>
+      {isOpen && (
+        <tr className="border-b border-border bg-muted/20">
+          <td colSpan={8} className="px-4 py-4">
+            <div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Mail className="h-4 w-4" />
+                <span className="text-foreground">{c.email}</span>
+              </div>
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <MapPin className="h-4 w-4" />
+                <span className="text-foreground">{c.address || "No address provided"}</span>
+              </div>
+            </div>
+          </td>
+        </tr>
+      )}
+    </>
   );
 }
