@@ -12,6 +12,7 @@ import {
   ChevronUp,
   Mail,
   MapPin,
+  Printer,
 } from "lucide-react";
 import { useCustomers, type Customer, type PaymentStatus } from "@/lib/customers";
 import { Toaster } from "@/components/ui/sonner";
@@ -19,6 +20,63 @@ import { toast } from "sonner";
 import { EditCustomerDialog } from "@/components/EditCustomerDialog";
 
 type Filter = "All" | PaymentStatus;
+
+function printCustomerBill(c: Customer) {
+  const win = window.open("", "_blank", "width=600,height=700");
+  if (!win) {
+    toast.error("Popup blocked. Allow popups to print.");
+    return;
+  }
+  const html = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Bill - ${c.name}</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 32px; color: #0f172a; background: #fff; }
+  .bill { max-width: 480px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; }
+  .header { background: #2563eb; color: #fff; padding: 20px 24px; }
+  .header h1 { margin: 0; font-size: 22px; letter-spacing: 0.3px; }
+  .header p { margin: 4px 0 0; font-size: 12px; opacity: 0.9; }
+  .body { padding: 24px; }
+  .row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dashed #e2e8f0; font-size: 14px; }
+  .row:last-child { border-bottom: none; }
+  .label { color: #64748b; font-weight: 500; }
+  .value { color: #0f172a; font-weight: 600; }
+  .total { margin-top: 12px; padding: 14px 16px; background: #f1f5f9; border-radius: 8px; display: flex; justify-content: space-between; font-size: 16px; }
+  .total .value { color: #2563eb; font-size: 18px; }
+  .footer { text-align: center; padding: 16px; font-size: 11px; color: #94a3b8; border-top: 1px solid #e2e8f0; }
+  @media print { body { padding: 0; } .bill { border: none; } }
+</style>
+</head>
+<body>
+  <div class="bill">
+    <div class="header">
+      <h1>Customer Bill</h1>
+      <p>Receipt generated on ${new Date().toLocaleDateString()}</p>
+    </div>
+    <div class="body">
+      <div class="row"><span class="label">Name</span><span class="value">${escapeHtml(c.name)}</span></div>
+      <div class="row"><span class="label">Net MB</span><span class="value">${escapeHtml(String(c.netMb))} MB</span></div>
+      <div class="row"><span class="label">Date</span><span class="value">${escapeHtml(c.date || "—")}</span></div>
+      <div class="total"><span class="label">Bill</span><span class="value">${escapeHtml(String(c.fees))}</span></div>
+    </div>
+    <div class="footer">Thank you for your business</div>
+  </div>
+  <script>
+    window.onload = function () { window.print(); setTimeout(function(){ window.close(); }, 300); };
+  </script>
+</body>
+</html>`;
+  win.document.open();
+  win.document.write(html);
+  win.document.close();
+}
+
+function escapeHtml(s: string) {
+  return s.replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]!));
+}
 
 export function AllCustomersPage() {
   const { customers, remove, update, toggleStatus, setStatusAll } = useCustomers();
@@ -200,6 +258,7 @@ export function AllCustomersPage() {
                             }
                           }}
                           onCycleStatus={() => toggleStatus(c.id)}
+                          onPrint={() => printCustomerBill(c)}
                         />
                       );
                     })
@@ -264,6 +323,7 @@ function FragmentRow({
   onEdit,
   onDelete,
   onCycleStatus,
+  onPrint,
 }: {
   c: Customer;
   isOpen: boolean;
@@ -271,6 +331,7 @@ function FragmentRow({
   onEdit: () => void;
   onDelete: () => void;
   onCycleStatus: () => void;
+  onPrint: () => void;
 }) {
   return (
     <>
@@ -295,6 +356,15 @@ function FragmentRow({
               aria-label={isOpen ? "Collapse" : "Expand"}
             >
               {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            </button>
+            <button
+              type="button"
+              onClick={onPrint}
+              className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
+              aria-label="Print bill"
+              title="Print bill"
+            >
+              <Printer className="h-4 w-4" />
             </button>
             <button
               type="button"
