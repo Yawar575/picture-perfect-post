@@ -185,7 +185,33 @@ export function AllCustomersPage() {
             </select>
           </div>
 
-          <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)]">
+          {/* Mobile: card list */}
+          <div className="space-y-3 sm:hidden">
+            {filtered.length === 0 ? (
+              <div className="rounded-2xl border border-border bg-card p-6 text-center text-sm text-muted-foreground shadow-[var(--shadow-card)]">
+                No customers match your filters.
+              </div>
+            ) : (
+              filtered.map((c) => (
+                <CustomerCard
+                  key={c.id}
+                  c={c}
+                  onEdit={() => setEditing(c)}
+                  onDelete={() => {
+                    if (window.confirm(`Delete ${c.name}?`)) {
+                      remove(c.id);
+                      toast.success("Customer removed");
+                    }
+                  }}
+                  onCycleStatus={() => toggleStatus(c.id)}
+                  onPrint={() => setBilling(c)}
+                />
+              ))
+            )}
+          </div>
+
+          {/* Desktop: table */}
+          <div className="hidden overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)] sm:block">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
@@ -234,8 +260,8 @@ export function AllCustomersPage() {
             </div>
           </div>
 
-          <footer className="mt-6 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)]">
-            <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
+          <footer className="mt-5 rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)] sm:mt-6 sm:p-6">
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 sm:gap-6">
               <RingStat
                 label="Total Customers"
                 value={customers.length}
