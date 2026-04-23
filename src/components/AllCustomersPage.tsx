@@ -230,21 +230,38 @@ export function AllCustomersPage() {
             </div>
           </div>
 
-          <footer className="mt-6 rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-card)]">
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-              <CircleStat
+          <footer className="mt-6 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)]">
+            <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
+              <RingStat
                 label="Total Customers"
                 value={customers.length}
+                percent={100}
+                display={String(customers.length)}
                 tone="primary"
               />
-              <CircleStat
+              <RingStat
                 label="Total Fees"
-                value={stats.totalFees.toLocaleString()}
+                value={stats.totalFees}
+                percent={100}
+                display={stats.totalFees.toLocaleString()}
                 tone="foreground"
               />
-              <CircleStat label="Paid" value={stats.paid} tone="emerald" />
-              <CircleStat label="Unpaid" value={stats.unpaid} tone="rose" />
-              <CircleStat label="Pending" value={stats.pending} tone="amber" />
+              <RingStat
+                label="Paid"
+                value={stats.paid}
+                percent={
+                  customers.length ? (stats.paid / customers.length) * 100 : 0
+                }
+                tone="emerald"
+              />
+              <RingStat
+                label="Unpaid"
+                value={stats.unpaid}
+                percent={
+                  customers.length ? (stats.unpaid / customers.length) * 100 : 0
+                }
+                tone="rose"
+              />
             </div>
           </footer>
         </>
