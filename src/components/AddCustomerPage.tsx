@@ -8,7 +8,7 @@ import { Toaster } from "@/components/ui/sonner";
 
 const schema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100),
-  email: z.string().trim().email("Invalid email").max(255),
+  phone: z.string().trim().min(1, "Phone is required").max(30),
   address: z.string().trim().min(1, "Address is required").max(255),
   netMb: z.coerce.number().min(0, "Must be ≥ 0").max(1000000),
   fees: z.coerce.number().min(0, "Must be ≥ 0").max(10000000),
@@ -23,7 +23,7 @@ export function AddCustomerPage() {
   const navigate = useNavigate();
   const [form, setForm] = useState({
     name: "",
-    email: "",
+    phone: "",
     address: "",
     netMb: "",
     fees: "",
@@ -79,13 +79,14 @@ export function AddCustomerPage() {
               className={inputCls}
             />
           </Field>
-          <Field label="Email Address">
+          <Field label="Phone Number">
             <input
-              type="email"
-              value={form.email}
-              onChange={(e) => update("email", e.target.value)}
-              placeholder="email@example.com"
-              maxLength={255}
+              type="tel"
+              inputMode="tel"
+              value={form.phone}
+              onChange={(e) => update("phone", e.target.value)}
+              placeholder="e.g. 03001234567"
+              maxLength={30}
               className={inputCls}
             />
           </Field>
