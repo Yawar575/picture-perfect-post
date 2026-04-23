@@ -6,7 +6,7 @@ import type { Customer, PaymentStatus } from "@/lib/customers";
 
 const schema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100),
-  email: z.string().trim().email("Invalid email").max(255),
+  phone: z.string().trim().min(1, "Phone is required").max(30),
   address: z.string().trim().min(1, "Address is required").max(255),
   netMb: z.coerce.number().min(0).max(1000000),
   fees: z.coerce.number().min(0).max(10000000),
@@ -26,7 +26,7 @@ const inputCls =
 export function EditCustomerDialog({ customer, onClose, onSave }: Props) {
   const [form, setForm] = useState({
     name: "",
-    email: "",
+    phone: "",
     address: "",
     netMb: "",
     fees: "",
@@ -38,7 +38,7 @@ export function EditCustomerDialog({ customer, onClose, onSave }: Props) {
     if (customer) {
       setForm({
         name: customer.name,
-        email: customer.email,
+        phone: customer.phone,
         address: customer.address,
         netMb: String(customer.netMb),
         fees: String(customer.fees),
@@ -107,13 +107,14 @@ export function EditCustomerDialog({ customer, onClose, onSave }: Props) {
                 onChange={(e) => update("name", e.target.value)}
               />
             </Field>
-            <Field label="Email Address">
+            <Field label="Phone Number">
               <input
-                type="email"
+                type="tel"
+                inputMode="tel"
                 className={inputCls}
-                value={form.email}
-                maxLength={255}
-                onChange={(e) => update("email", e.target.value)}
+                value={form.phone}
+                maxLength={30}
+                onChange={(e) => update("phone", e.target.value)}
               />
             </Field>
             <Field label="Address" className="sm:col-span-2">
