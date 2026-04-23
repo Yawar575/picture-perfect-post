@@ -288,6 +288,32 @@ function BillDialog({
   customer: Customer | null;
   onClose: () => void;
 }) {
+  function buildBillText(c: Customer) {
+    return (
+      `*Muna Networking*\n\n` +
+      `Name: ${c.name}\n` +
+      `Net MB: ${c.netMb} MB\n` +
+      `Date: ${formatBillDate(c.date)}\n` +
+      `Bill: ${c.fees}\n` +
+      `Status: ${c.status}`
+    );
+  }
+
+  function handleWhatsApp() {
+    if (!customer) return;
+    const text = encodeURIComponent(buildBillText(customer));
+    const phone = customer.phone.replace(/[^\d]/g, "");
+    const url = phone
+      ? `https://wa.me/${phone}?text=${text}`
+      : `https://wa.me/?text=${text}`;
+    window.open(url, "_blank", "noopener,noreferrer");
+  }
+
+  function handleSave() {
+    if (!customer) return;
+    window.print();
+  }
+
   return (
     <Dialog open={!!customer} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-sm overflow-hidden p-0">
@@ -297,13 +323,13 @@ function BillDialog({
           </DialogTitle>
         </DialogHeader>
         {customer && (
-          <div className="relative px-6 pb-6 pt-2">
+          <div className="relative px-6 pb-5 pt-4">
             <div className="divide-y divide-border">
               <BillRow label="Name" value={customer.name} />
               <BillRow label="Net MB" value={`${customer.netMb} MB`} />
               <BillRow label="Date" value={formatBillDate(customer.date)} />
             </div>
-            <div className="mt-4 flex items-center justify-between rounded-xl bg-muted px-4 py-3">
+            <div className="mt-5 flex items-center justify-between rounded-xl bg-muted px-4 py-4">
               <span className="text-sm font-semibold text-muted-foreground">
                 Bill
               </span>
@@ -319,6 +345,24 @@ function BillDialog({
                 className="pointer-events-none absolute left-1/2 top-1/2 h-40 w-40 -translate-x-1/2 -translate-y-1/2 -rotate-12 select-none opacity-80"
               />
             )}
+            <div className="mt-5 grid grid-cols-2 gap-2.5">
+              <button
+                type="button"
+                onClick={handleWhatsApp}
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-[var(--shadow-button)] transition-colors hover:bg-emerald-600"
+              >
+                <Share2 className="h-4 w-4" />
+                WhatsApp
+              </button>
+              <button
+                type="button"
+                onClick={handleSave}
+                className="inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-3.5 py-2.5 text-sm font-semibold text-foreground shadow-[var(--shadow-card)] transition-colors hover:bg-muted"
+              >
+                <Download className="h-4 w-4" />
+                Save
+              </button>
+            </div>
           </div>
         )}
       </DialogContent>
