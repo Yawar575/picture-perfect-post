@@ -288,6 +288,20 @@ function BillDialog({
   customer: Customer | null;
   onClose: () => void;
 }) {
+  const slipRef = useRef<HTMLDivElement | null>(null);
+  const [busy, setBusy] = useState<"share" | "save" | null>(null);
+
+  async function captureSlip(): Promise<Blob | null> {
+    const node = slipRef.current;
+    if (!node) return null;
+    const { toBlob } = await import("html-to-image");
+    return await toBlob(node, {
+      pixelRatio: 2,
+      cacheBust: true,
+      backgroundColor: "#ffffff",
+    });
+  }
+
   function buildBillText(c: Customer) {
     return (
       `*Muna Networking*\n\n` +
@@ -299,71 +313,144 @@ function BillDialog({
     );
   }
 
-  function handleWhatsApp() {
-    if (!customer) return;
-    const text = encodeURIComponent(buildBillText(customer));
-    const phone = customer.phone.replace(/[^\d]/g, "");
+  function openWhatsAppText(c: Customer) {
+    const text = encodeURIComponent(buildBillText(c));
+    const phone = c.phone.replace(/[^\d]/g, "");
     const url = phone
       ? `https://wa.me/${phone}?text=${text}`
       : `https://wa.me/?text=${text}`;
     window.open(url, "_blank", "noopener,noreferrer");
   }
 
-  function handleSave() {
-    if (!customer) return;
-    window.print();
+  async function handleWhatsApp() {
+    if (!customer || busy) return;
+    setBusy("share");
+    try {
+      const blob = await captureSlip();
+      if (blob) {
+        const file = new File([blob], `bill-${customer.name}.png`, {
+          type: "image/png",
+        });
+        const navAny = navigator as Navigator & {
+          canShare?: (data: { files: File[] }) => boolean;
+          share?: (data: ShareData & { files?: File[] }) => Promise<void>;
+        };
+        if (
+          navAny.canShare &&
+          navAny.share &&
+          navAny.canShare({ files: [file] })
+        ) {
+          try {
+            await navAny.share({
+              files: [file],
+              title: "Bill",
+              text: buildBillText(customer),
+            });
+            return;
+          } catch (err) {
+            const e = err as DOMException;
+            if (e?.name === "AbortError") return;
+          }
+        }
+      }
+      // Fallback: open WhatsApp chat with prefilled text
+      openWhatsAppText(customer);
+      toast.message("Image sharing not supported here", {
+        description: "Opened WhatsApp with bill text instead.",
+      });
+    } catch (err) {
+      console.error(err);
+      toast.error("Could not share bill");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function handleSave() {
+    if (!customer || busy) return;
+    setBusy("save");
+    try {
+      const blob = await captureSlip();
+      if (!blob) {
+        toast.error("Could not generate image");
+        return;
+      }
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `bill-${customer.name.replace(/\s+/g, "_")}-${customer.date || "slip"}.png`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      toast.success("Saved to your device");
+    } catch (err) {
+      console.error(err);
+      toast.error("Could not save bill");
+    } finally {
+      setBusy(null);
+    }
   }
 
   return (
     <Dialog open={!!customer} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-sm overflow-hidden p-0">
-        <DialogHeader className="bg-primary px-6 py-5 text-primary-foreground sm:text-center">
-          <DialogTitle className="text-center text-xl font-bold tracking-tight">
-            Muna Networking
-          </DialogTitle>
-        </DialogHeader>
         {customer && (
-          <div className="relative px-6 pb-5 pt-4">
-            <div className="divide-y divide-border">
-              <BillRow label="Name" value={customer.name} />
-              <BillRow label="Net MB" value={`${customer.netMb} MB`} />
-              <BillRow label="Date" value={formatBillDate(customer.date)} />
+          <>
+            <DialogHeader className="sr-only">
+              <DialogTitle>Muna Networking Bill</DialogTitle>
+            </DialogHeader>
+            <div ref={slipRef} className="bg-card">
+              <div className="bg-primary px-6 py-5 text-center text-primary-foreground">
+                <h2 className="text-xl font-bold tracking-tight">
+                  Muna Networking
+                </h2>
+              </div>
+              <div className="relative px-6 pb-6 pt-5">
+                <div className="divide-y divide-border">
+                  <BillRow label="Name" value={customer.name} />
+                  <BillRow label="Net MB" value={`${customer.netMb} MB`} />
+                  <BillRow label="Date" value={formatBillDate(customer.date)} />
+                </div>
+                <div className="mt-5 flex items-center justify-between rounded-xl bg-muted px-4 py-4">
+                  <span className="text-sm font-semibold text-muted-foreground">
+                    Bill
+                  </span>
+                  <span className="text-2xl font-bold text-primary">
+                    {customer.fees}
+                  </span>
+                </div>
+                {customer.status === "Paid" && (
+                  <img
+                    src={paidStamp}
+                    alt="Paid stamp"
+                    aria-hidden
+                    className="pointer-events-none absolute left-1/2 top-1/2 h-40 w-40 -translate-x-1/2 -translate-y-1/2 -rotate-12 select-none opacity-80"
+                  />
+                )}
+              </div>
             </div>
-            <div className="mt-5 flex items-center justify-between rounded-xl bg-muted px-4 py-4">
-              <span className="text-sm font-semibold text-muted-foreground">
-                Bill
-              </span>
-              <span className="text-2xl font-bold text-primary">
-                {customer.fees}
-              </span>
-            </div>
-            {customer.status === "Paid" && (
-              <img
-                src={paidStamp}
-                alt="Paid stamp"
-                aria-hidden
-                className="pointer-events-none absolute left-1/2 top-1/2 h-40 w-40 -translate-x-1/2 -translate-y-1/2 -rotate-12 select-none opacity-80"
-              />
-            )}
-            <div className="mt-5 grid grid-cols-2 gap-2.5">
+            <div className="grid grid-cols-2 gap-2.5 px-6 pb-6">
               <button
                 type="button"
                 onClick={handleWhatsApp}
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-[var(--shadow-button)] transition-colors hover:bg-emerald-600"
+                disabled={busy !== null}
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-[var(--shadow-button)] transition-colors hover:bg-emerald-600 disabled:opacity-60"
               >
                 <Share2 className="h-4 w-4" />
-                WhatsApp
+                {busy === "share" ? "Sharing..." : "WhatsApp"}
               </button>
               <button
                 type="button"
                 onClick={handleSave}
-                className="inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-3.5 py-2.5 text-sm font-semibold text-foreground shadow-[var(--shadow-card)] transition-colors hover:bg-muted"
+                disabled={busy !== null}
+                className="inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-3.5 py-2.5 text-sm font-semibold text-foreground shadow-[var(--shadow-card)] transition-colors hover:bg-muted disabled:opacity-60"
               >
                 <Download className="h-4 w-4" />
-                Save
+                {busy === "save" ? "Saving..." : "Save"}
               </button>
             </div>
-          </div>
+          </>
         )}
       </DialogContent>
     </Dialog>
