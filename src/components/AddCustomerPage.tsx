@@ -85,7 +85,7 @@ export function AddCustomerPage() {
               inputMode="tel"
               value={form.phone}
               onChange={(e) => update("phone", e.target.value)}
-              placeholder="e.g. 03001234567"
+              placeholder="Phone Number"
               maxLength={30}
               className={inputCls}
             />

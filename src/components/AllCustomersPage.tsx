@@ -27,6 +27,18 @@ import {
 
 type Filter = "All" | PaymentStatus;
 
+function formatBillDate(date: string) {
+  if (!date) return "—";
+  // Expecting "YYYY-MM-DD" from <input type="date">
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date);
+  if (m) return `${m[3]}/${m[2]}/${m[1]}`;
+  const d = new Date(date);
+  if (Number.isNaN(d.getTime())) return date;
+  const dd = String(d.getDate()).padStart(2, "0");
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  return `${dd}/${mm}/${d.getFullYear()}`;
+}
+
 export function AllCustomersPage() {
   const { customers, remove, update, toggleStatus, setStatusAll } = useCustomers();
   const [editing, setEditing] = useState<Customer | null>(null);
@@ -274,7 +286,7 @@ function BillDialog({
             <div className="divide-y divide-border">
               <BillRow label="Name" value={customer.name} />
               <BillRow label="Net MB" value={`${customer.netMb} MB`} />
-              <BillRow label="Date" value={customer.date || "—"} />
+              <BillRow label="Date" value={formatBillDate(customer.date)} />
             </div>
             <div className="mt-4 flex items-center justify-between rounded-xl bg-muted px-4 py-3">
               <span className="text-sm font-semibold text-muted-foreground">
