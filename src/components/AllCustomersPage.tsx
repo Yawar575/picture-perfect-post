@@ -13,6 +13,8 @@ import {
   Phone,
   MapPin,
   Receipt,
+  Share2,
+  Download,
 } from "lucide-react";
 import { useCustomers, type Customer, type PaymentStatus } from "@/lib/customers";
 import { Toaster } from "@/components/ui/sonner";
