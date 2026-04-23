@@ -319,6 +319,62 @@ function BillRow({ label, value }: { label: string; value: string }) {
   );
 }
 
+type StatTone = "primary" | "foreground" | "emerald" | "rose" | "amber";
+
+const TONE_CLASSES: Record<StatTone, { ring: string; text: string; bg: string }> = {
+  primary: {
+    ring: "border-primary/30",
+    text: "text-primary",
+    bg: "bg-primary/10",
+  },
+  foreground: {
+    ring: "border-foreground/20",
+    text: "text-foreground",
+    bg: "bg-muted",
+  },
+  emerald: {
+    ring: "border-emerald-400/50 dark:border-emerald-500/40",
+    text: "text-emerald-600 dark:text-emerald-400",
+    bg: "bg-emerald-50 dark:bg-emerald-950/40",
+  },
+  rose: {
+    ring: "border-rose-400/50 dark:border-rose-500/40",
+    text: "text-rose-600 dark:text-rose-400",
+    bg: "bg-rose-50 dark:bg-rose-950/40",
+  },
+  amber: {
+    ring: "border-amber-400/50 dark:border-amber-500/40",
+    text: "text-amber-600 dark:text-amber-400",
+    bg: "bg-amber-50 dark:bg-amber-950/40",
+  },
+};
+
+function CircleStat({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: number | string;
+  tone: StatTone;
+}) {
+  const t = TONE_CLASSES[tone];
+  return (
+    <div className="flex flex-col items-center gap-2">
+      <div
+        className={`flex h-20 w-20 items-center justify-center rounded-full border-4 ${t.ring} ${t.bg}`}
+      >
+        <span className={`text-xl font-extrabold tabular-nums ${t.text}`}>
+          {value}
+        </span>
+      </div>
+      <span className="text-center text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        {label}
+      </span>
+    </div>
+  );
+}
+
 function StatusPill({ status }: { status: PaymentStatus }) {
   const cls =
     status === "Paid"
