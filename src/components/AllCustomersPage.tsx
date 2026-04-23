@@ -248,7 +248,58 @@ export function AllCustomersPage() {
         onClose={() => setEditing(null)}
         onSave={(id, patch) => update(id, patch)}
       />
+
+      <BillDialog customer={billing} onClose={() => setBilling(null)} />
     </main>
+  );
+}
+
+function BillDialog({
+  customer,
+  onClose,
+}: {
+  customer: Customer | null;
+  onClose: () => void;
+}) {
+  return (
+    <Dialog open={!!customer} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-sm overflow-hidden p-0">
+        <DialogHeader className="bg-primary px-6 py-5 text-primary-foreground">
+          <DialogTitle className="text-xl font-bold tracking-tight">
+            Customer Bill
+          </DialogTitle>
+        </DialogHeader>
+        {customer && (
+          <div className="px-6 pb-6 pt-2">
+            <div className="divide-y divide-border">
+              <BillRow label="Name" value={customer.name} />
+              <BillRow label="Net MB" value={`${customer.netMb} MB`} />
+              <BillRow label="Date" value={customer.date || "—"} />
+            </div>
+            <div className="mt-4 flex items-center justify-between rounded-xl bg-muted px-4 py-3">
+              <span className="text-sm font-semibold text-muted-foreground">
+                Bill
+              </span>
+              <span className="text-2xl font-bold text-primary">
+                {customer.fees}
+              </span>
+            </div>
+            <p className="mt-4 text-center text-xs text-muted-foreground">
+              Take a screenshot and send to your customer
+            </p>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function BillRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between py-3 text-sm">
+      <span className="font-medium text-muted-foreground">{label}</span>
+      <span className="font-semibold text-foreground">{value}</span>
+    </div>
   );
 }
 
