@@ -266,11 +266,11 @@ function BillDialog({
       <DialogContent className="max-w-sm overflow-hidden p-0">
         <DialogHeader className="bg-primary px-6 py-5 text-primary-foreground">
           <DialogTitle className="text-xl font-bold tracking-tight">
-            Customer Bill
+            Muna Networking
           </DialogTitle>
         </DialogHeader>
         {customer && (
-          <div className="px-6 pb-6 pt-2">
+          <div className="relative px-6 pb-6 pt-2">
             <div className="divide-y divide-border">
               <BillRow label="Name" value={customer.name} />
               <BillRow label="Net MB" value={`${customer.netMb} MB`} />
@@ -284,6 +284,15 @@ function BillDialog({
                 {customer.fees}
               </span>
             </div>
+            {customer.status === "Paid" && (
+              <div
+                aria-hidden
+                className="pointer-events-none absolute right-4 top-6 -rotate-12 select-none rounded-md border-4 border-emerald-600 px-3 py-1 text-2xl font-extrabold uppercase tracking-widest text-emerald-600 opacity-80 shadow-sm"
+                style={{ fontFamily: "Georgia, serif" }}
+              >
+                Received
+              </div>
+            )}
             <p className="mt-4 text-center text-xs text-muted-foreground">
               Take a screenshot and send to your customer
             </p>
