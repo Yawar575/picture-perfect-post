@@ -82,16 +82,16 @@ export function AllCustomersPage() {
   }
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10">
+    <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10">
       <Toaster richColors position="top-right" />
 
-      <header className="mb-6 flex flex-wrap items-start justify-between gap-3">
-        <div className="flex items-start gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent text-accent-foreground">
+      <header className="mb-5 flex flex-wrap items-start justify-between gap-3 sm:mb-6">
+        <div className="flex min-w-0 items-start gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent text-accent-foreground sm:h-12 sm:w-12">
             <Users className="h-5 w-5" />
           </div>
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight text-foreground">
+          <div className="min-w-0">
+            <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
               All Customers
             </h1>
             <p className="mt-0.5 text-sm text-muted-foreground">
@@ -105,10 +105,11 @@ export function AllCustomersPage() {
             window.dispatchEvent(new Event("customers:changed"));
             toast.success("Refreshed");
           }}
-          className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3.5 py-2 text-sm font-semibold text-foreground shadow-[var(--shadow-card)] transition-colors hover:bg-muted"
+          className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm font-semibold text-foreground shadow-[var(--shadow-card)] transition-colors hover:bg-muted sm:px-3.5"
+          aria-label="Refresh"
         >
           <RefreshCw className="h-4 w-4" />
-          Refresh
+          <span className="hidden sm:inline">Refresh</span>
         </button>
       </header>
 
@@ -184,7 +185,33 @@ export function AllCustomersPage() {
             </select>
           </div>
 
-          <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)]">
+          {/* Mobile: card list */}
+          <div className="space-y-3 sm:hidden">
+            {filtered.length === 0 ? (
+              <div className="rounded-2xl border border-border bg-card p-6 text-center text-sm text-muted-foreground shadow-[var(--shadow-card)]">
+                No customers match your filters.
+              </div>
+            ) : (
+              filtered.map((c) => (
+                <CustomerCard
+                  key={c.id}
+                  c={c}
+                  onEdit={() => setEditing(c)}
+                  onDelete={() => {
+                    if (window.confirm(`Delete ${c.name}?`)) {
+                      remove(c.id);
+                      toast.success("Customer removed");
+                    }
+                  }}
+                  onCycleStatus={() => toggleStatus(c.id)}
+                  onPrint={() => setBilling(c)}
+                />
+              ))
+            )}
+          </div>
+
+          {/* Desktop: table */}
+          <div className="hidden overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)] sm:block">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
@@ -233,8 +260,8 @@ export function AllCustomersPage() {
             </div>
           </div>
 
-          <footer className="mt-6 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)]">
-            <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
+          <footer className="mt-5 rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)] sm:mt-6 sm:p-6">
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 sm:gap-6">
               <RingStat
                 label="Total Customers"
                 value={customers.length}
@@ -394,7 +421,7 @@ function BillDialog({
 
   return (
     <Dialog open={!!customer} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-sm overflow-hidden p-0">
+      <DialogContent className="w-[calc(100vw-2rem)] max-w-sm overflow-hidden p-0">
         {customer && (
           <>
             <DialogHeader className="sr-only">
@@ -657,5 +684,87 @@ function FragmentRow({
         </tr>
       )}
     </>
+  );
+}
+
+function CustomerCard({
+  c,
+  onEdit,
+  onDelete,
+  onCycleStatus,
+  onPrint,
+}: {
+  c: Customer;
+  onEdit: () => void;
+  onDelete: () => void;
+  onCycleStatus: () => void;
+  onPrint: () => void;
+}) {
+  return (
+    <div className="rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)]">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h3 className="truncate text-base font-bold text-foreground">{c.name}</h3>
+          <p className="mt-0.5 truncate text-xs text-muted-foreground">{c.phone}</p>
+        </div>
+        <button type="button" onClick={onCycleStatus} aria-label="Cycle status">
+          <StatusPill status={c.status} />
+        </button>
+      </div>
+
+      <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+            Net MB
+          </p>
+          <p className="mt-0.5 font-semibold text-foreground">{c.netMb} MB</p>
+        </div>
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+            Fees
+          </p>
+          <p className="mt-0.5 font-bold text-foreground">{c.fees}</p>
+        </div>
+        <div className="col-span-2">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+            Address
+          </p>
+          <p className="mt-0.5 break-words text-foreground">{c.address || "—"}</p>
+        </div>
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+            Date
+          </p>
+          <p className="mt-0.5 text-foreground">{formatBillDate(c.date)}</p>
+        </div>
+      </div>
+
+      <div className="mt-4 flex items-center justify-end gap-1 border-t border-border pt-3">
+        <button
+          type="button"
+          onClick={onPrint}
+          className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
+          aria-label="Show bill"
+        >
+          <Receipt className="h-4 w-4" />
+        </button>
+        <button
+          type="button"
+          onClick={onEdit}
+          className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+          aria-label="Edit customer"
+        >
+          <Pencil className="h-4 w-4" />
+        </button>
+        <button
+          type="button"
+          onClick={onDelete}
+          className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+          aria-label="Delete customer"
+        >
+          <Trash2 className="h-4 w-4" />
+        </button>
+      </div>
+    </div>
   );
 }
