@@ -264,8 +264,8 @@ function BillDialog({
   return (
     <Dialog open={!!customer} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-sm overflow-hidden p-0">
-        <DialogHeader className="bg-primary px-6 py-5 text-primary-foreground">
-          <DialogTitle className="text-xl font-bold tracking-tight">
+        <DialogHeader className="bg-primary px-6 py-5 text-primary-foreground sm:text-center">
+          <DialogTitle className="text-center text-xl font-bold tracking-tight">
             Muna Networking
           </DialogTitle>
         </DialogHeader>
@@ -287,7 +287,7 @@ function BillDialog({
             {customer.status === "Paid" && (
               <div
                 aria-hidden
-                className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 -rotate-12 select-none rounded-md border-4 border-emerald-600 px-4 py-1.5 text-3xl font-extrabold uppercase tracking-widest text-emerald-600 opacity-70 shadow-sm"
+                className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 -rotate-12 select-none rounded border-2 border-emerald-600 px-2 py-0.5 text-base font-extrabold uppercase tracking-widest text-emerald-600 opacity-70"
                 style={{ fontFamily: "Georgia, serif" }}
               >
                 Received
