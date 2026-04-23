@@ -12,6 +12,7 @@ import {
   ChevronUp,
   Mail,
   MapPin,
+  Printer,
 } from "lucide-react";
 import { useCustomers, type Customer, type PaymentStatus } from "@/lib/customers";
 import { Toaster } from "@/components/ui/sonner";
