@@ -10,12 +10,12 @@ export function TopNav() {
 
   return (
     <header className="border-b border-border bg-card">
-      <div className="mx-auto flex max-w-5xl items-center justify-between gap-2 px-4 py-3 sm:px-6">
-        <Link to="/" className="flex items-center gap-2">
+      <div className="mx-auto flex max-w-5xl items-center justify-between gap-2 px-4 py-2 sm:px-6">
+        <Link to="/" className="flex items-center gap-2 shrink-0">
           <img
             src={munaLogo}
             alt="Muna Networking logo"
-            className="h-10 w-auto sm:h-12"
+            className="h-16 w-auto sm:h-20 object-contain"
           />
         </Link>
         <nav className="flex items-center gap-2">
