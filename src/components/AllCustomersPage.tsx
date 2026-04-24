@@ -431,19 +431,21 @@ function BillDialog({
             </DialogHeader>
             <div ref={slipRef} className="bg-card">
               <div
-                className="relative flex items-center justify-center px-6 py-6"
+                className="relative flex items-center justify-center px-6 py-8"
                 style={{
                   backgroundImage: `url(${billHeaderBg})`,
                   backgroundSize: "cover",
                   backgroundPosition: "center",
                 }}
               >
-                <div className="absolute inset-0 bg-black/30" />
-                <img
-                  src={munaLogo}
-                  alt="Muna Networking logo"
-                  className="relative z-10 h-28 w-auto object-contain drop-shadow-lg sm:h-32"
-                />
+                <div className="absolute inset-0 bg-black/60" />
+                <div className="relative z-10 rounded-2xl bg-white/95 px-6 py-3 shadow-2xl ring-1 ring-white/40 backdrop-blur-sm">
+                  <img
+                    src={munaLogo}
+                    alt="Muna Networking logo"
+                    className="h-32 w-auto object-contain sm:h-40"
+                  />
+                </div>
               </div>
               <div className="relative px-6 pb-6 pt-5">
                 <div className="divide-y divide-border">
