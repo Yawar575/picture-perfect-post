@@ -1,6 +1,7 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import { UserPlus, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
+import munaLogo from "@/assets/muna-logo.png";
 
 export function TopNav() {
   const location = useLocation();
@@ -9,7 +10,15 @@ export function TopNav() {
 
   return (
     <header className="border-b border-border bg-card">
-      <div className="mx-auto flex max-w-5xl items-center justify-end gap-2 px-4 py-3 sm:px-6">
+      <div className="mx-auto flex max-w-5xl items-center justify-between gap-2 px-4 py-3 sm:px-6">
+        <Link to="/" className="flex items-center gap-2">
+          <img
+            src={munaLogo}
+            alt="Muna Networking logo"
+            className="h-10 w-auto sm:h-12"
+          />
+        </Link>
+        <nav className="flex items-center gap-2">
         <Link
           to="/"
           className={cn(
@@ -20,7 +29,7 @@ export function TopNav() {
           )}
         >
           <UserPlus className="h-4 w-4" />
-          Add Customer
+          <span className="hidden sm:inline">Add Customer</span>
         </Link>
         <Link
           to="/customers"
@@ -32,8 +41,9 @@ export function TopNav() {
           )}
         >
           <Users className="h-4 w-4" />
-          All Customers
+          <span className="hidden sm:inline">All Customers</span>
         </Link>
+        </nav>
       </div>
     </header>
   );
