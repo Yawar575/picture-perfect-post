@@ -21,6 +21,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import { EditCustomerDialog } from "@/components/EditCustomerDialog";
 import paidStamp from "@/assets/paid-stamp.png";
+import munaLogo from "@/assets/muna-logo.png";
 import {
   Dialog,
   DialogContent,
@@ -428,10 +429,12 @@ function BillDialog({
               <DialogTitle>Muna Networking Bill</DialogTitle>
             </DialogHeader>
             <div ref={slipRef} className="bg-card">
-              <div className="bg-primary px-6 py-5 text-center text-primary-foreground">
-                <h2 className="text-xl font-bold tracking-tight">
-                  Muna Networking
-                </h2>
+              <div className="flex items-center justify-center bg-slate-800 px-6 py-4">
+                <img
+                  src={munaLogo}
+                  alt="Muna Networking logo"
+                  className="h-20 w-auto object-contain"
+                />
               </div>
               <div className="relative px-6 pb-6 pt-5">
                 <div className="divide-y divide-border">
