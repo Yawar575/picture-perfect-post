@@ -15,6 +15,9 @@ import {
   Receipt,
   Share2,
   Download,
+  User,
+  Wifi,
+  CalendarDays,
 } from "lucide-react";
 import { useCustomers, type Customer, type PaymentStatus } from "@/lib/customers";
 import { Toaster } from "@/components/ui/sonner";
@@ -459,25 +462,84 @@ function BillDialog({
               <DialogTitle>Muna Networking Bill</DialogTitle>
             </DialogHeader>
             <div ref={slipRef} className="bg-card">
+              {/* Banner */}
               <img
                 src={billBanner}
                 alt="Muna Networking"
                 className="block w-full h-auto object-cover"
               />
+              {/* Decorative accent strip */}
+              <div className="h-1.5 w-full bg-gradient-to-r from-primary via-emerald-500 to-primary" />
+
               <div className="relative px-6 pb-6 pt-5">
-                <div className="divide-y divide-border">
-                  <BillRow label="Name" value={customer.name} />
-                  <BillRow label="Net MB" value={`${customer.netMb} MB`} />
-                  <BillRow label="Date" value={formatBillDate(customer.date)} />
-                </div>
-                <div className="mt-5 flex items-center justify-between rounded-xl bg-muted px-4 py-4">
-                  <span className="text-sm font-semibold text-muted-foreground">
-                    Bill
+                {/* Bill meta header */}
+                <div className="mb-4 flex items-center justify-between">
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                      Invoice
+                    </p>
+                    <p className="mt-0.5 font-mono text-xs text-foreground/70">
+                      #{customer.id.slice(0, 8).toUpperCase()}
+                    </p>
+                  </div>
+                  <span
+                    className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${
+                      customer.status === "Paid"
+                        ? "bg-emerald-500/15 text-emerald-600"
+                        : customer.status === "Unpaid"
+                          ? "bg-rose-500/15 text-rose-600"
+                          : "bg-amber-500/15 text-amber-600"
+                    }`}
+                  >
+                    {customer.status}
                   </span>
-                  <span className="text-2xl font-bold text-primary">
-                    {customer.fees}
-                  </span>
                 </div>
+
+                {/* Detail rows */}
+                <div className="overflow-hidden rounded-xl border border-border bg-muted/40">
+                  <BillRow
+                    icon={<User className="h-3.5 w-3.5" />}
+                    label="Name"
+                    value={customer.name}
+                  />
+                  <BillRow
+                    icon={<Wifi className="h-3.5 w-3.5" />}
+                    label="Net MB"
+                    value={`${customer.netMb} MB`}
+                  />
+                  <BillRow
+                    icon={<CalendarDays className="h-3.5 w-3.5" />}
+                    label="Date"
+                    value={formatBillDate(customer.date)}
+                    last
+                  />
+                </div>
+
+                {/* Total panel */}
+                <div className="mt-5 overflow-hidden rounded-xl bg-gradient-to-br from-primary to-primary/80 p-[1px] shadow-[var(--shadow-card)]">
+                  <div className="flex items-center justify-between rounded-[11px] bg-card px-4 py-4">
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                        Amount Due
+                      </span>
+                      <span className="text-xs text-muted-foreground/80">
+                        Monthly subscription
+                      </span>
+                    </div>
+                    <span className="text-3xl font-extrabold tracking-tight text-primary">
+                      {Number(customer.fees).toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Footer note */}
+                <div className="mt-4 flex items-center justify-between border-t border-dashed border-border pt-3">
+                  <p className="text-[11px] font-medium text-muted-foreground">
+                    Thank you for choosing Muna Networking
+                  </p>
+                  <Receipt className="h-3.5 w-3.5 text-muted-foreground/70" />
+                </div>
+
                 {customer.status === "Paid" && (
                   <img
                     src={paidStamp}
@@ -515,10 +577,31 @@ function BillDialog({
   );
 }
 
-function BillRow({ label, value }: { label: string; value: string }) {
+function BillRow({
+  label,
+  value,
+  icon,
+  last,
+}: {
+  label: string;
+  value: string;
+  icon?: React.ReactNode;
+  last?: boolean;
+}) {
   return (
-    <div className="flex items-center justify-between py-3 text-sm">
-      <span className="font-medium text-muted-foreground">{label}</span>
+    <div
+      className={`flex items-center justify-between px-4 py-3 text-sm ${
+        last ? "" : "border-b border-border/60"
+      }`}
+    >
+      <span className="flex items-center gap-2 font-medium text-muted-foreground">
+        {icon ? (
+          <span className="flex h-6 w-6 items-center justify-center rounded-md bg-primary/10 text-primary">
+            {icon}
+          </span>
+        ) : null}
+        {label}
+      </span>
       <span className="font-semibold text-foreground">{value}</span>
     </div>
   );
