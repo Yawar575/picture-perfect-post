@@ -521,11 +521,10 @@ function BillDialog({
                 </div>
 
                 {/* Footer note */}
-                <div className="mt-4 flex items-center justify-between border-t border-dashed border-border pt-3">
-                  <p className="text-[11px] font-medium text-muted-foreground">
+                <div className="mt-4 border-t border-dashed border-border pt-3">
+                  <p className="text-center text-[12px] font-bold text-black dark:text-white">
                     Thank you for choosing Muna Networking
                   </p>
-                  <Receipt className="h-3.5 w-3.5 text-muted-foreground/70" />
                 </div>
 
                 {customer.status === "Paid" && (
@@ -533,7 +532,7 @@ function BillDialog({
                     src={paidStamp}
                     alt="Paid stamp"
                     aria-hidden
-                    className="pointer-events-none absolute left-1/2 top-1/2 h-40 w-40 -translate-x-1/2 -translate-y-1/2 -rotate-12 select-none opacity-80"
+                    className="pointer-events-none absolute left-1/2 top-1/3 h-40 w-40 -translate-x-1/2 -translate-y-1/2 -rotate-12 select-none opacity-80"
                   />
                 )}
               </div>
