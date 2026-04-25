@@ -455,48 +455,80 @@ function BillDialog({
 
   return (
     <Dialog open={!!customer} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="w-[calc(100vw-2rem)] max-w-sm overflow-hidden p-0">
+      <DialogContent className="w-[calc(100vw-2rem)] max-w-sm overflow-hidden border-0 bg-transparent p-0 shadow-none">
         {customer && (
           <>
             <DialogHeader className="sr-only">
               <DialogTitle>Muna Networking Bill</DialogTitle>
             </DialogHeader>
-            <div ref={slipRef} className="bg-card">
+            <div
+              ref={slipRef}
+              className="relative overflow-hidden rounded-2xl bg-card shadow-[0_25px_60px_-15px_rgba(0,0,0,0.35)] ring-1 ring-border/60"
+            >
               {/* Banner */}
-              <img
-                src={billBanner}
-                alt="Muna Networking"
-                className="block w-full h-auto object-cover"
-              />
-              {/* Decorative accent strip */}
-              <div className="h-1.5 w-full bg-gradient-to-r from-primary via-emerald-500 to-primary" />
+              <div className="relative">
+                <img
+                  src={billBanner}
+                  alt="Muna Networking"
+                  className="block w-full h-auto object-cover"
+                />
+                {/* Decorative accent strip */}
+                <div className="h-1.5 w-full bg-gradient-to-r from-primary via-emerald-500 to-primary" />
+              </div>
 
-              <div className="relative px-6 pb-6 pt-5">
+              {/* Ticket notch divider */}
+              <div className="relative h-6 bg-card">
+                <div className="absolute -left-3 top-1/2 h-6 w-6 -translate-y-1/2 rounded-full bg-background" />
+                <div className="absolute -right-3 top-1/2 h-6 w-6 -translate-y-1/2 rounded-full bg-background" />
+                <div className="absolute left-6 right-6 top-1/2 -translate-y-1/2 border-t-2 border-dashed border-border/70" />
+              </div>
+
+              {/* Subtle dotted pattern background */}
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-x-0 bottom-0 top-[calc(100%-340px)] opacity-[0.04]"
+                style={{
+                  backgroundImage:
+                    "radial-gradient(circle, currentColor 1px, transparent 1px)",
+                  backgroundSize: "14px 14px",
+                }}
+              />
+
+              <div className="relative px-6 pb-6 pt-2">
                 {/* Bill meta header */}
                 <div className="mb-4 flex items-center justify-between">
                   <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
                       Invoice
                     </p>
-                    <p className="mt-0.5 font-mono text-xs text-foreground/70">
+                    <p className="mt-1 font-mono text-xs font-semibold text-foreground/80">
                       #{customer.id.slice(0, 8).toUpperCase()}
                     </p>
                   </div>
                   <span
-                    className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${
+                    className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider shadow-sm ring-1 ${
                       customer.status === "Paid"
-                        ? "bg-emerald-500/15 text-emerald-600"
+                        ? "bg-emerald-500/10 text-emerald-600 ring-emerald-500/30"
                         : customer.status === "Unpaid"
-                          ? "bg-rose-500/15 text-rose-600"
-                          : "bg-amber-500/15 text-amber-600"
+                          ? "bg-rose-500/10 text-rose-600 ring-rose-500/30"
+                          : "bg-amber-500/10 text-amber-600 ring-amber-500/30"
                     }`}
                   >
+                    <span
+                      className={`h-1.5 w-1.5 rounded-full ${
+                        customer.status === "Paid"
+                          ? "bg-emerald-500"
+                          : customer.status === "Unpaid"
+                            ? "bg-rose-500"
+                            : "bg-amber-500"
+                      } animate-pulse`}
+                    />
                     {customer.status}
                   </span>
                 </div>
 
                 {/* Detail rows */}
-                <div className="overflow-hidden rounded-xl border border-border bg-muted/40">
+                <div className="overflow-hidden rounded-2xl border border-border/70 bg-gradient-to-br from-muted/60 to-muted/20 shadow-inner">
                   <BillRow
                     icon={<User className="h-3.5 w-3.5" />}
                     label="Name"
@@ -516,28 +548,33 @@ function BillDialog({
                 </div>
 
                 {/* Total panel */}
-                <div className="mt-5 overflow-hidden rounded-xl bg-gradient-to-br from-primary to-primary/80 p-[1px] shadow-[var(--shadow-card)]">
-                  <div className="flex items-center justify-between rounded-[11px] bg-card px-4 py-4">
-                    <div className="flex flex-col">
-                      <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                <div className="relative mt-5 overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary to-emerald-500 p-[1.5px] shadow-[0_10px_30px_-10px_color-mix(in_oklab,var(--primary)_60%,transparent)]">
+                  <div className="relative flex items-center justify-between overflow-hidden rounded-[14px] bg-card px-5 py-4">
+                    {/* shine */}
+                    <div
+                      aria-hidden
+                      className="pointer-events-none absolute -left-10 -top-10 h-24 w-24 rounded-full bg-primary/10 blur-2xl"
+                    />
+                    <div className="relative flex flex-col">
+                      <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
                         Amount Due
                       </span>
-                      <span className="text-xs text-muted-foreground/80">
+                      <span className="mt-0.5 text-xs text-muted-foreground/80">
                         Monthly subscription
                       </span>
                     </div>
-                    <span className="text-3xl font-extrabold tracking-tight text-primary">
+                    <span className="relative bg-gradient-to-r from-primary to-emerald-500 bg-clip-text text-3xl font-extrabold tracking-tight text-transparent">
                       {Number(customer.fees).toLocaleString()}
                     </span>
                   </div>
                 </div>
 
                 {/* Footer note */}
-                <div className="mt-4 flex items-center justify-between border-t border-dashed border-border pt-3">
-                  <p className="text-[11px] font-medium text-muted-foreground">
+                <div className="mt-5 flex items-center justify-between border-t border-dashed border-border pt-3">
+                  <p className="text-[11px] font-medium italic text-muted-foreground">
                     Thank you for choosing Muna Networking
                   </p>
-                  <Receipt className="h-3.5 w-3.5 text-muted-foreground/70" />
+                  <Receipt className="h-3.5 w-3.5 text-primary/70" />
                 </div>
 
                 {customer.status === "Paid" && (
@@ -550,12 +587,12 @@ function BillDialog({
                 )}
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-2.5 px-6 pb-6">
+            <div className="mt-3 grid grid-cols-2 gap-2.5 px-1 pb-1">
               <button
                 type="button"
                 onClick={handleWhatsApp}
                 disabled={busy !== null}
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-[var(--shadow-button)] transition-colors hover:bg-emerald-600 disabled:opacity-60"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 px-3.5 py-3 text-sm font-semibold text-white shadow-[0_8px_20px_-8px_rgba(16,185,129,0.6)] transition-all hover:scale-[1.02] hover:shadow-[0_10px_25px_-8px_rgba(16,185,129,0.7)] active:scale-[0.98] disabled:opacity-60"
               >
                 <Share2 className="h-4 w-4" />
                 {busy === "share" ? "Sharing..." : "WhatsApp"}
@@ -564,7 +601,7 @@ function BillDialog({
                 type="button"
                 onClick={handleSave}
                 disabled={busy !== null}
-                className="inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-3.5 py-2.5 text-sm font-semibold text-foreground shadow-[var(--shadow-card)] transition-colors hover:bg-muted disabled:opacity-60"
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-card px-3.5 py-3 text-sm font-semibold text-foreground shadow-[var(--shadow-card)] transition-all hover:scale-[1.02] hover:bg-muted active:scale-[0.98] disabled:opacity-60"
               >
                 <Download className="h-4 w-4" />
                 {busy === "save" ? "Saving..." : "Save"}
