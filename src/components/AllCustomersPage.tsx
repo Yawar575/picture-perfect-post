@@ -65,13 +65,20 @@ export function AllCustomersPage() {
     let paid = 0;
     let unpaid = 0;
     let pending = 0;
+    let remainingFees = 0;
     for (const c of customers) {
-      totalFees += Number(c.fees) || 0;
+      const fee = Number(c.fees) || 0;
+      totalFees += fee;
       if (c.status === "Paid") paid++;
-      else if (c.status === "Unpaid") unpaid++;
-      else pending++;
+      else if (c.status === "Unpaid") {
+        unpaid++;
+        remainingFees += fee;
+      } else {
+        pending++;
+        remainingFees += fee;
+      }
     }
-    return { totalFees, paid, unpaid, pending };
+    return { totalFees, paid, unpaid, pending, remainingFees };
   }, [customers]);
 
   function handleBulk(status: PaymentStatus) {
@@ -262,7 +269,7 @@ export function AllCustomersPage() {
           </div>
 
           <footer className="mt-5 rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)] sm:mt-6 sm:p-6">
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 sm:gap-6">
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-5 sm:gap-6">
               <RingStat
                 label="Total Customers"
                 value={customers.length}
@@ -292,6 +299,17 @@ export function AllCustomersPage() {
                   customers.length ? (stats.unpaid / customers.length) * 100 : 0
                 }
                 tone="rose"
+              />
+              <RingStat
+                label="Remaining Fees"
+                value={stats.remainingFees}
+                percent={
+                  stats.totalFees
+                    ? (stats.remainingFees / stats.totalFees) * 100
+                    : 0
+                }
+                display={stats.remainingFees.toLocaleString()}
+                tone="amber"
               />
             </div>
           </footer>
