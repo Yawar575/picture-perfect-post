@@ -472,29 +472,6 @@ function BillDialog({
               <div className="h-1.5 w-full bg-gradient-to-r from-primary via-emerald-500 to-primary" />
 
               <div className="relative px-6 pb-6 pt-5">
-                {/* Bill meta header */}
-                <div className="mb-4 flex items-center justify-between">
-                  <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                      Invoice
-                    </p>
-                    <p className="mt-0.5 font-mono text-xs text-foreground/70">
-                      #{customer.id.slice(0, 8).toUpperCase()}
-                    </p>
-                  </div>
-                  <span
-                    className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${
-                      customer.status === "Paid"
-                        ? "bg-emerald-500/15 text-emerald-600"
-                        : customer.status === "Unpaid"
-                          ? "bg-rose-500/15 text-rose-600"
-                          : "bg-amber-500/15 text-amber-600"
-                    }`}
-                  >
-                    {customer.status}
-                  </span>
-                </div>
-
                 {/* Detail rows */}
                 <div className="overflow-hidden rounded-xl border border-border bg-muted/40">
                   <BillRow
@@ -515,20 +492,31 @@ function BillDialog({
                   />
                 </div>
 
-                {/* Total panel */}
-                <div className="mt-5 overflow-hidden rounded-xl bg-gradient-to-br from-primary to-primary/80 p-[1px] shadow-[var(--shadow-card)]">
-                  <div className="flex items-center justify-between rounded-[11px] bg-card px-4 py-4">
-                    <div className="flex flex-col">
-                      <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                        Amount Due
-                      </span>
-                      <span className="text-xs text-muted-foreground/80">
-                        Monthly subscription
-                      </span>
+                {/* Total panel — premium */}
+                <div className="mt-5 overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary to-emerald-500 p-[1.5px] shadow-[var(--shadow-card)]">
+                  <div className="relative overflow-hidden rounded-[15px] bg-card px-5 py-5">
+                    {/* subtle decorative blobs */}
+                    <div className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-primary/10 blur-2xl" />
+                    <div className="pointer-events-none absolute -left-6 -bottom-8 h-20 w-20 rounded-full bg-emerald-500/10 blur-2xl" />
+
+                    <div className="relative flex items-center justify-between gap-4">
+                      <div className="flex flex-col">
+                        <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-primary/80">
+                          Amount Due
+                        </span>
+                        <span className="mt-1 text-xs font-medium text-muted-foreground">
+                          Monthly subscription
+                        </span>
+                      </div>
+                      <div className="flex items-baseline gap-1.5">
+                        <span className="bg-gradient-to-br from-primary to-emerald-600 bg-clip-text text-4xl font-extrabold tracking-tight text-transparent">
+                          {Number(customer.fees).toLocaleString()}
+                        </span>
+                        <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                          PKR
+                        </span>
+                      </div>
                     </div>
-                    <span className="text-3xl font-extrabold tracking-tight text-primary">
-                      {Number(customer.fees).toLocaleString()}
-                    </span>
                   </div>
                 </div>
 
