@@ -65,12 +65,15 @@ export function AllCustomersPage() {
     let paid = 0;
     let unpaid = 0;
     let pending = 0;
+    let paidFees = 0;
     let remainingFees = 0;
     for (const c of customers) {
       const fee = Number(c.fees) || 0;
       totalFees += fee;
-      if (c.status === "Paid") paid++;
-      else if (c.status === "Unpaid") {
+      if (c.status === "Paid") {
+        paid++;
+        paidFees += fee;
+      } else if (c.status === "Unpaid") {
         unpaid++;
         remainingFees += fee;
       } else {
@@ -78,7 +81,7 @@ export function AllCustomersPage() {
         remainingFees += fee;
       }
     }
-    return { totalFees, paid, unpaid, pending, remainingFees };
+    return { totalFees, paid, unpaid, pending, paidFees, remainingFees };
   }, [customers]);
 
   function handleBulk(status: PaymentStatus) {
@@ -269,20 +272,13 @@ export function AllCustomersPage() {
           </div>
 
           <footer className="mt-5 rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)] sm:mt-6 sm:p-6">
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-5 sm:gap-6">
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6 sm:gap-6">
               <RingStat
                 label="Total Customers"
                 value={customers.length}
                 percent={100}
                 display={String(customers.length)}
                 tone="primary"
-              />
-              <RingStat
-                label="Total Fees"
-                value={stats.totalFees}
-                percent={100}
-                display={stats.totalFees.toLocaleString()}
-                tone="foreground"
               />
               <RingStat
                 label="Paid"
@@ -299,6 +295,22 @@ export function AllCustomersPage() {
                   customers.length ? (stats.unpaid / customers.length) * 100 : 0
                 }
                 tone="rose"
+              />
+              <RingStat
+                label="Total Fees"
+                value={stats.totalFees}
+                percent={100}
+                display={stats.totalFees.toLocaleString()}
+                tone="foreground"
+              />
+              <RingStat
+                label="Paid Fees"
+                value={stats.paidFees}
+                percent={
+                  stats.totalFees ? (stats.paidFees / stats.totalFees) * 100 : 0
+                }
+                display={stats.paidFees.toLocaleString()}
+                tone="emerald"
               />
               <RingStat
                 label="Remaining Fees"
