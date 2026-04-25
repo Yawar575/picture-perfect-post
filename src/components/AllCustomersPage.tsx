@@ -589,7 +589,7 @@ function BillRow({
         ) : null}
         {label}
       </span>
-      <span className="font-semibold text-foreground">{value}</span>
+      <span className="text-right font-bold text-foreground">{value}</span>
     </div>
   );
 }
