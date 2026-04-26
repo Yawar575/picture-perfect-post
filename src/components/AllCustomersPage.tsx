@@ -56,11 +56,16 @@ export function AllCustomersPage() {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return customers.filter((c) => {
-      if (filter !== "All" && c.status !== filter) return false;
-      if (!q) return true;
-      return c.name.toLowerCase().includes(q) || c.phone.toLowerCase().includes(q);
-    });
+    return customers
+      .filter((c) => {
+        if (filter !== "All" && c.status !== filter) return false;
+        if (!q) return true;
+        return c.name.toLowerCase().includes(q) || c.phone.toLowerCase().includes(q);
+      })
+      .slice()
+      .sort((a, b) =>
+        a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
+      );
   }, [customers, query, filter]);
 
   const stats = useMemo(() => {
