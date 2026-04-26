@@ -679,11 +679,27 @@ function RingStat({
             className={`${t.stroke} transition-[stroke-dashoffset] duration-500`}
           />
         </svg>
-        <div className="absolute inset-0 flex flex-col items-center justify-center leading-tight">
-          <span className={`text-lg font-extrabold tabular-nums ${t.text}`}>
-            {display ?? value}
-          </span>
-          <span className="text-[10px] font-semibold text-muted-foreground">
+        <div className="absolute inset-0 flex flex-col items-center justify-center leading-tight px-2">
+          {(() => {
+            const text = String(display ?? value);
+            // Auto-shrink font so long numbers stay inside the ring
+            const sizeClass =
+              text.length <= 3
+                ? "text-lg"
+                : text.length <= 5
+                  ? "text-sm"
+                  : text.length <= 7
+                    ? "text-[11px]"
+                    : "text-[10px]";
+            return (
+              <span
+                className={`font-extrabold tabular-nums leading-none ${sizeClass} ${t.text}`}
+              >
+                {text}
+              </span>
+            );
+          })()}
+          <span className="mt-1 text-[10px] font-semibold text-muted-foreground">
             {Math.round(clamped)}%
           </span>
         </div>
