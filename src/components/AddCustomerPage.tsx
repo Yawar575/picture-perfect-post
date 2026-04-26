@@ -7,9 +7,19 @@ import { useCustomers } from "@/lib/customers";
 import { Toaster } from "@/components/ui/sonner";
 
 const schema = z.object({
-  name: z.string().trim().min(1, "Name is required").max(100),
+  name: z
+    .string()
+    .trim()
+    .min(1, "Name is required")
+    .max(100)
+    .transform(toTitleCase),
   phone: z.string().trim().min(1, "Phone is required").max(30),
-  address: z.string().trim().min(1, "Address is required").max(255),
+  address: z
+    .string()
+    .trim()
+    .min(1, "Address is required")
+    .max(255)
+    .transform(toTitleCase),
   netMb: z.coerce.number().min(0, "Must be ≥ 0").max(1000000),
   fees: z.coerce.number().min(0, "Must be ≥ 0").max(10000000),
   date: z.string().min(1, "Date is required"),
@@ -17,6 +27,14 @@ const schema = z.object({
 });
 
 const today = () => new Date().toISOString().slice(0, 10);
+
+function toTitleCase(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/\b\p{L}[\p{L}\p{M}'’-]*/gu, (word) =>
+      word.charAt(0).toUpperCase() + word.slice(1),
+    );
+}
 
 export function AddCustomerPage() {
   const { add } = useCustomers();
