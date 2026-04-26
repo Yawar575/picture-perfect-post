@@ -321,7 +321,7 @@ export function AllCustomersPage() {
                 label="Total Fees"
                 value={stats.totalFees}
                 percent={100}
-                display={stats.totalFees.toLocaleString()}
+                display={formatCompact(stats.totalFees)}
                 tone="foreground"
               />
               <RingStat
@@ -330,7 +330,7 @@ export function AllCustomersPage() {
                 percent={
                   stats.totalFees ? (stats.paidFees / stats.totalFees) * 100 : 0
                 }
-                display={stats.paidFees.toLocaleString()}
+                display={formatCompact(stats.paidFees)}
                 tone="emerald"
               />
               <RingStat
@@ -341,7 +341,7 @@ export function AllCustomersPage() {
                     ? (stats.remainingFees / stats.totalFees) * 100
                     : 0
                 }
-                display={stats.remainingFees.toLocaleString()}
+                display={formatCompact(stats.remainingFees)}
                 tone="amber"
               />
             </div>
