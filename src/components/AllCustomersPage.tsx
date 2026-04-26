@@ -46,19 +46,6 @@ function formatBillDate(date: string) {
   return `${dd}/${mm}/${d.getFullYear()}`;
 }
 
-function formatCompact(value: number): string {
-  const abs = Math.abs(value);
-  const trim = (n: number) => {
-    const s = n.toFixed(1);
-    return s.endsWith(".0") ? s.slice(0, -2) : s;
-  };
-  if (abs >= 1_000_000_000) return `${trim(value / 1_000_000_000)}B`;
-  if (abs >= 1_000_000) return `${trim(value / 1_000_000)}M`;
-  if (abs >= 10_000) return `${Math.round(value / 1000)}k`;
-  if (abs >= 1_000) return `${trim(value / 1000)}k`;
-  return value.toLocaleString();
-}
-
 export function AllCustomersPage() {
   const { customers, remove, update, toggleStatus, setStatusAll } = useCustomers();
   const [editing, setEditing] = useState<Customer | null>(null);
@@ -321,7 +308,7 @@ export function AllCustomersPage() {
                 label="Total Fees"
                 value={stats.totalFees}
                 percent={100}
-                display={formatCompact(stats.totalFees)}
+                display={stats.totalFees.toLocaleString()}
                 tone="foreground"
               />
               <RingStat
@@ -330,7 +317,7 @@ export function AllCustomersPage() {
                 percent={
                   stats.totalFees ? (stats.paidFees / stats.totalFees) * 100 : 0
                 }
-                display={formatCompact(stats.paidFees)}
+                display={stats.paidFees.toLocaleString()}
                 tone="emerald"
               />
               <RingStat
@@ -341,7 +328,7 @@ export function AllCustomersPage() {
                     ? (stats.remainingFees / stats.totalFees) * 100
                     : 0
                 }
-                display={formatCompact(stats.remainingFees)}
+                display={stats.remainingFees.toLocaleString()}
                 tone="amber"
               />
             </div>
